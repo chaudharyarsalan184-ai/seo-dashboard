@@ -15,8 +15,8 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">SEO Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">SEO Dashboard</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         <div className="rounded-xl bg-slate-800/50 border border-slate-700 p-6">
           <p className="text-slate-400 text-sm">Websites</p>
           <p className="text-3xl font-bold text-cyan-400 mt-1">{websites.length}</p>

@@ -133,27 +133,29 @@ export default function CreateBlog() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-6">Create Blog</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6">Create Blog</h1>
 
-      <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
-        {[1, 2, 3, 4, 5, 6, 7].map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setStep(s as Step)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              step >= s ? 'bg-cyan-500/30 text-cyan-400' : 'bg-slate-800 text-slate-500'
-            }`}
-          >
-            {s}
-          </button>
-        ))}
-        <span className="shrink-0 self-center text-slate-500 text-sm">Website → Category → Topic → Keywords → Content → Plagiarism → Publish</span>
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0 shrink-0">
+          {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setStep(s as Step)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                step >= s ? 'bg-cyan-500/30 text-cyan-400' : 'bg-slate-800 text-slate-500'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <span className="text-slate-500 text-xs sm:text-sm shrink-0">Website → Category → Topic → Keywords → Content → Plagiarism → Publish</span>
       </div>
 
       {/* Step 1: Select websites */}
       {step === 1 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Select websites</h2>
           {websites.length === 0 ? (
             <p className="text-slate-500">Add websites in the Websites section first.</p>
@@ -186,7 +188,7 @@ export default function CreateBlog() {
 
       {/* Step 2: Category */}
       {step === 2 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Select category</h2>
           <select
             value={category}
@@ -218,7 +220,7 @@ export default function CreateBlog() {
 
       {/* Step 3: Topic */}
       {step === 3 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Enter blog topic</h2>
           <input
             type="text"
@@ -245,7 +247,7 @@ export default function CreateBlog() {
 
       {/* Step 4: Keywords */}
       {step === 4 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Keywords (select to use)</h2>
           <div className="flex flex-wrap gap-2">
             {keywords.map((kw) => (
@@ -279,7 +281,7 @@ export default function CreateBlog() {
 
       {/* Step 5: Content preview */}
       {step === 5 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Generated content</h2>
           {(imageUrl || imageData) && (
             <img src={imageUrl || imageData!} alt="" className="mb-4 rounded-lg w-full max-h-64 object-cover" />
@@ -320,7 +322,7 @@ export default function CreateBlog() {
 
       {/* Step 6: Plagiarism */}
       {step === 6 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Uniqueness check</h2>
           <div className="flex items-center gap-4 mb-6">
             <div className={`rounded-full p-4 ${uniqueness !== null && uniqueness >= 90 ? 'bg-emerald-500/20' : uniqueness !== null && uniqueness >= 70 ? 'bg-amber-500/20' : 'bg-red-500/20'}`}>
@@ -360,7 +362,7 @@ export default function CreateBlog() {
 
       {/* Step 7: Done */}
       {step === 7 && (
-        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-emerald-400 mb-4">Blog saved & upload initiated</h2>
           <div className="space-y-2 mb-4">
             {uploadResults.map((r) => (

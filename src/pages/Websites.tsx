@@ -49,30 +49,30 @@ export default function Websites() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-8">Websites</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">Websites</h1>
       <p className="text-slate-400 mb-6">Add your travel websites. Each gets a unique ID to connect for auto blog uploads.</p>
 
-      <form onSubmit={add} className="mb-10 flex flex-wrap gap-4">
+      <form onSubmit={add} className="mb-10 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
         <input
           type="text"
           placeholder="Website name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-w-0 flex-1 sm:flex-initial"
         />
         <input
           type="url"
           placeholder="https://yoursite.com"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-w-0 flex-1 sm:flex-initial"
         />
         <input
           type="text"
-          placeholder="Site ID (optional - from target site)"
+          placeholder="Site ID (optional)"
           value={siteId}
           onChange={(e) => setSiteId(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-w-0 flex-1 sm:flex-initial"
           title="If your site expects a specific ID (e.g. SEO_SITE_IDS), paste it here"
         />
         <button
@@ -88,9 +88,9 @@ export default function Websites() {
         {websites.map((w) => (
           <div
             key={w.id}
-            className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-700 bg-slate-800/50 p-4"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-700 bg-slate-800/50 p-4"
           >
-            <div>
+            <div className="min-w-0">
               <p className="font-medium text-white">{w.name}</p>
               <a href={w.url} target="_blank" rel="noreferrer" className="text-sm text-cyan-400 hover:underline">
                 {w.url}
@@ -106,7 +106,7 @@ export default function Websites() {
                 </button>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={async () => {
