@@ -495,6 +495,18 @@ app.post('/api/upload-to-websites', async (req, res) => {
   }
 });
 
+// Serve built frontend in production (Docker / dist present)
+const distDir = path.join(__dirname, '..', 'dist');
+try {
+  const stat = await fs.stat(distDir);
+  if (stat?.isDirectory()) {
+    app.use(express.static(distDir));
+    app.get(/^(?!\/api\/).*$/, (req, res) => {
+      res.sendFile(path.join(distDir, 'index.html'));
+    });
+  }
+} catch {}
+
 app.listen(PORT, () => {
   const hasKey = !!process.env.GROQ_API_KEY?.trim();
   console.log(`SEO Dashboard API running at http://localhost:${PORT}`);
