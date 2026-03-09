@@ -23,7 +23,7 @@ export async function fetchJSON<T>(url: string, options?: RequestInit): Promise<
 export const api = {
   websites: {
     list: () => fetchJSON<any[]>('/websites'),
-    create: (data: { name: string; url: string }) => fetchJSON<any>('/websites', { method: 'POST', body: JSON.stringify(data) }),
+    create: (data: { name: string; url: string; siteId?: string }) => fetchJSON<any>('/websites', { method: 'POST', body: JSON.stringify(data) }),
     delete: (id: string) => fetchJSON('/websites/' + id, { method: 'DELETE' }),
   },
   categories: {

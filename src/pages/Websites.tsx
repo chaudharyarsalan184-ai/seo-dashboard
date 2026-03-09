@@ -5,6 +5,7 @@ export default function Websites() {
   const [websites, setWebsites] = useState<any[]>([]);
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
+  const [siteId, setSiteId] = useState('');
   const [loading, setLoading] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
@@ -19,9 +20,10 @@ export default function Websites() {
     if (!name.trim() || !url.trim()) return;
     setLoading(true);
     try {
-      await api.websites.create({ name: name.trim(), url: url.trim() });
+      await api.websites.create({ name: name.trim(), url: url.trim(), siteId: siteId.trim() || undefined });
       setName('');
       setUrl('');
+      setSiteId('');
       load();
     } catch (err) {
       alert((err as Error).message);
@@ -64,6 +66,14 @@ export default function Websites() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+        />
+        <input
+          type="text"
+          placeholder="Site ID (optional - from target site)"
+          value={siteId}
+          onChange={(e) => setSiteId(e.target.value)}
+          className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          title="If your site expects a specific ID (e.g. SEO_SITE_IDS), paste it here"
         />
         <button
           type="submit"
@@ -156,9 +166,9 @@ export default function Websites() {
         <h3 className="font-semibold text-white mb-2">How to connect your travel websites</h3>
         <ol className="text-slate-400 text-sm space-y-2 list-decimal list-inside">
           <li>Add your site above (name + URL like <code className="bg-slate-900 px-1 rounded">https://yoursite.com</code>)</li>
-          <li>Copy the <strong className="text-slate-300">Unique ID</strong> for that website</li>
-          <li>On your travel site, create an API endpoint: <code className="bg-slate-900 px-1 rounded">POST /api/receive-blog?siteId=YOUR_ID</code></li>
-          <li>Verify <code className="bg-slate-900 px-1 rounded">siteId</code> matches your ID, then save the blog (DB, JSON, WordPress post, etc.)</li>
+          <li><strong className="text-slate-300">Site ID</strong>: If your site already has <code className="bg-slate-900 px-1 rounded">SEO_SITE_IDS</code> set, paste that ID in the optional field. Otherwise leave blank and copy the generated ID after adding.</li>
+          <li>On your travel site, set <code className="bg-slate-900 px-1 rounded">SEO_SITE_IDS=YOUR_ID</code> (env) and implement <code className="bg-slate-900 px-1 rounded">POST /api/receive-blog?siteId=YOUR_ID</code></li>
+          <li>In production, configure <code className="bg-slate-900 px-1 rounded">TURSO_DATABASE_URL</code> and <code className="bg-slate-900 px-1 rounded">TURSO_AUTH_TOKEN</code> on your site.</li>
         </ol>
         <p className="text-slate-500 text-sm">
           The dashboard sends: <code className="bg-slate-900 px-1 rounded">topic</code>, <code className="bg-slate-900 px-1 rounded">category</code>, <code className="bg-slate-900 px-1 rounded">content</code> (HTML), <code className="bg-slate-900 px-1 rounded">metaTitle</code>, <code className="bg-slate-900 px-1 rounded">metaDescription</code>, <code className="bg-slate-900 px-1 rounded">imageData</code>, <code className="bg-slate-900 px-1 rounded">keywords</code>

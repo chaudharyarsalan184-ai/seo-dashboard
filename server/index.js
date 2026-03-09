@@ -87,9 +87,9 @@ app.get('/api/websites', async (req, res) => {
 
 app.post('/api/websites', async (req, res) => {
   try {
-    const { name, url } = req.body;
+    const { name, url, siteId } = req.body;
     const websites = await loadJSON(WEBSITES_FILE);
-    const uniqueId = randomUUID().replace(/-/g, '').slice(0, 16);
+    const uniqueId = (siteId && String(siteId).trim()) || randomUUID().replace(/-/g, '').slice(0, 16);
     const website = { id: uniqueId, name, url, createdAt: new Date().toISOString() };
     websites.push(website);
     await saveJSON(WEBSITES_FILE, websites);
