@@ -1,0 +1,50 @@
+[
+  {
+    "id": "0",
+    "name": "Travel Tips"
+  },
+  {
+    "id": "1",
+    "name": "Destination Guides"
+  },
+  {
+    "id": "2",
+    "name": "Adventure Travel"
+  },
+  {
+    "id": "3",
+    "name": "Budget Travel"
+  },
+  {
+    "id": "4",
+    "name": "Luxury Travel"
+  },
+  {
+    "id": "5",
+    "name": "Family Travel"
+  },
+  {
+    "id": "6",
+    "name": "Solo Travel"
+  },
+  {
+    "id": "7",
+    "name": "Road Trips"
+  },
+  {
+    "id": "8",
+    "name": "Beach Holidays"
+  },
+  {
+    "id": "9",
+    "name": "Cultural Experiences"
+  },
+  {
+    "id": "10",
+    "name": "Food & Dining"
+  },
+  {
+    "id": "11",
+    "name": "Travel Gear"
+  }
+]

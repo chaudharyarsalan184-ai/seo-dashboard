@@ -1,0 +1,12 @@
+{
+  "name": "seo-dashboard-receiver",
+  "version": "1.0.0",
+  "description": "Example receiver for blogs from Travel SEO Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

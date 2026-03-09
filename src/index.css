@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Blog content styling - proper h1, h2, h3 hierarchy */
+.prose h1 { @apply text-2xl font-bold mt-0 mb-4 text-white; }
+.prose h2 { @apply text-xl font-semibold mt-6 mb-3 text-slate-200 border-b border-slate-700 pb-2; }
+.prose h3 { @apply text-lg font-medium mt-4 mb-2 text-slate-300; }
+.prose p { @apply mb-4 text-slate-400 leading-relaxed; }
+.prose ul, .prose ol { @apply mb-4 pl-6 text-slate-400; }
+.prose a { @apply text-cyan-400 hover:underline; }
