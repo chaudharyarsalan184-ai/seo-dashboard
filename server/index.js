@@ -494,6 +494,7 @@ app.post('/api/sync-all-blogs', async (req, res) => {
       content: b.content,
       metaTitle: b.metaTitle,
       metaDescription: b.metaDescription,
+      slug: b.slug,
       imageData: b.imageData,
       imageUrl: b.imageUrl || null,
       keywords: b.keywords || [],

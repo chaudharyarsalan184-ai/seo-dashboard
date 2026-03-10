@@ -23,6 +23,7 @@ export default function CreateBlog() {
   const [numH2, setNumH2] = useState(5);
   const [numH3, setNumH3] = useState(2);
   const [numFaqs, setNumFaqs] = useState(4);
+  const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadResults, setUploadResults] = useState<any[]>([]);
 
@@ -132,6 +133,7 @@ export default function CreateBlog() {
         content,
         metaTitle,
         metaDescription,
+        slug: slug.trim() || undefined,
         imageData,
         imageUrl,
         keywords: selectedKeywords,
@@ -429,6 +431,16 @@ export default function CreateBlog() {
       {step === 6 && (
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Uniqueness check</h2>
+          <div className="mb-4">
+            <label className="block text-sm text-slate-400 mb-1">URL slug (optional)</label>
+            <input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="Leave empty to auto-generate from title"
+              className="w-full rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-white text-sm placeholder-slate-500"
+            />
+            <p className="text-xs text-slate-500 mt-1">e.g. my-custom-blog-url — used in /blog/your-slug</p>
+          </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
             <div className={`rounded-full p-4 shrink-0 ${uniqueness !== null && uniqueness >= 90 ? 'bg-emerald-500/20' : uniqueness !== null && uniqueness >= 70 ? 'bg-amber-500/20' : 'bg-red-500/20'}`}>
               <span className={`text-2xl font-bold ${uniqueness !== null && uniqueness >= 90 ? 'text-emerald-400' : uniqueness !== null && uniqueness >= 70 ? 'text-amber-400' : 'text-red-400'}`}>
@@ -503,6 +515,7 @@ export default function CreateBlog() {
               setSelectedKeywords([]);
               setMetaTitle('');
               setMetaDescription('');
+              setSlug('');
               setImageData(null);
               setImageUrl(null);
               setUniqueness(null);
