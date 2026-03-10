@@ -32,15 +32,24 @@ export const api = {
   },
   generateKeywords: (topic: string, category: string) =>
     fetchJSON<{ keywords: string[] }>('/generate-keywords', { method: 'POST', body: JSON.stringify({ topic, category }) }),
-  generateContent: (topic: string, category: string, keywords: string[], angleIndex?: number) =>
+  generateContent: (
+    topic: string,
+    category: string,
+    keywords: string[],
+    angleIndex?: number,
+    opts?: { wordLimit?: number; numH2?: number; numH3?: number; numFaqs?: number }
+  ) =>
     fetchJSON<{ content: string; metaTitle: string; metaDescription: string }>('/generate-content', {
       method: 'POST',
-      body: JSON.stringify({ topic, category, keywords, angleIndex }),
+      body: JSON.stringify({ topic, category, keywords, angleIndex, ...opts }),
     }),
   generateImage: (topic: string) =>
     fetchJSON<{ imageUrl?: string; imageData: string }>('/generate-image', { method: 'POST', body: JSON.stringify({ topic }) }),
   plagiarismCheck: (content: string) =>
-    fetchJSON<{ uniqueness: number; similarity: number }>('/plagiarism-check', { method: 'POST', body: JSON.stringify({ content }) }),
+    fetchJSON<{ uniqueness: number; similarity: number; note?: string }>('/plagiarism-check', {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
   blogs: {
     list: () => fetchJSON<any[]>('/blogs'),
     create: (data: any) => fetchJSON<any>('/blogs', { method: 'POST', body: JSON.stringify(data) }),

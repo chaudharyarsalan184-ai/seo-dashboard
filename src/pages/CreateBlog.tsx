@@ -18,6 +18,11 @@ export default function CreateBlog() {
   const [imageData, setImageData] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uniqueness, setUniqueness] = useState<number | null>(null);
+  const [plagiarismNote, setPlagiarismNote] = useState<string | null>(null);
+  const [wordLimit, setWordLimit] = useState(1000);
+  const [numH2, setNumH2] = useState(5);
+  const [numH3, setNumH3] = useState(2);
+  const [numFaqs, setNumFaqs] = useState(4);
   const [loading, setLoading] = useState(false);
   const [uploadResults, setUploadResults] = useState<any[]>([]);
 
@@ -55,7 +60,12 @@ export default function CreateBlog() {
     setLoading(true);
     try {
       const [contentRes, imageRes] = await Promise.all([
-        api.generateContent(topic, category, selectedKeywords.length ? selectedKeywords : keywords),
+        api.generateContent(topic, category, selectedKeywords.length ? selectedKeywords : keywords, undefined, {
+          wordLimit,
+          numH2,
+          numH3,
+          numFaqs,
+        }),
         api.generateImage(topic),
       ]);
       setContent(contentRes.content);
@@ -73,9 +83,11 @@ export default function CreateBlog() {
 
   const checkPlagiarism = async () => {
     setLoading(true);
+    setPlagiarismNote(null);
     try {
-      const { uniqueness: u } = await api.plagiarismCheck(content);
-      setUniqueness(u);
+      const res = await api.plagiarismCheck(content);
+      setUniqueness(res.uniqueness);
+      setPlagiarismNote(res.note || null);
       setStep(6);
     } catch (err) {
       alert((err as Error).message);
@@ -89,7 +101,12 @@ export default function CreateBlog() {
     try {
       const angleIndex = Math.floor(Math.random() * 12);
       const [contentRes, imageRes] = await Promise.all([
-        api.generateContent(topic, category, selectedKeywords.length ? selectedKeywords : keywords, angleIndex),
+        api.generateContent(topic, category, selectedKeywords.length ? selectedKeywords : keywords, angleIndex, {
+          wordLimit,
+          numH2,
+          numH3,
+          numFaqs,
+        }),
         api.generateImage(topic),
       ]);
       setContent(contentRes.content);
@@ -263,7 +280,62 @@ export default function CreateBlog() {
               </button>
             ))}
           </div>
-          <div className="mt-4 flex gap-3">
+
+          <div className="rounded-lg border border-slate-600 bg-slate-900/50 p-4 mb-6 mt-6 space-y-4">
+            <h3 className="text-sm font-medium text-slate-300">Content options</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Word limit</label>
+                <select
+                  value={wordLimit}
+                  onChange={(e) => setWordLimit(Number(e.target.value))}
+                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-white text-sm"
+                >
+                  {[500, 750, 1000, 1200, 1500, 2000].map((n) => (
+                    <option key={n} value={n}>{n} words</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">H2 sections</label>
+                <select
+                  value={numH2}
+                  onChange={(e) => setNumH2(Number(e.target.value))}
+                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-white text-sm"
+                >
+                  {[2, 3, 4, 5, 6, 7, 8].map((n) => (
+                    <option key={n} value={n}>{n} H2 sections</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">H3 per section</label>
+                <select
+                  value={numH3}
+                  onChange={(e) => setNumH3(Number(e.target.value))}
+                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-white text-sm"
+                >
+                  {[0, 1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{n} H3 subsections</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">FAQs</label>
+                <select
+                  value={numFaqs}
+                  onChange={(e) => setNumFaqs(Number(e.target.value))}
+                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-white text-sm"
+                >
+                  {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                    <option key={n} value={n}>{n} FAQs</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
             <button type="button" onClick={() => setStep(3)} className="rounded-lg border border-slate-600 px-4 py-2 text-slate-300 hover:bg-slate-700">
               Back
             </button>
@@ -283,9 +355,42 @@ export default function CreateBlog() {
       {step === 5 && (
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Generated content</h2>
-          {(imageUrl || imageData) && (
-            <img src={imageUrl || imageData!} alt="" className="mb-4 rounded-lg w-full max-h-64 object-cover" />
-          )}
+          <div className="mb-4 space-y-2">
+            {(imageUrl || imageData) && (
+              <img src={imageUrl || imageData!} alt="" className="rounded-lg w-full max-h-64 object-cover" />
+            )}
+            <div className="flex items-center gap-2">
+              <label className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 cursor-pointer inline-block">
+                Upload your own image
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const data = reader.result as string;
+                      setImageData(data);
+                      setImageUrl(data);
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              {(imageUrl || imageData) && (
+                <button
+                  type="button"
+                  onClick={() => { setImageData(null); setImageUrl(null); }}
+                  className="text-xs text-slate-500 hover:text-red-400"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
           <div className="space-y-2 mb-4">
             <label className="block text-sm text-slate-400">Meta Title</label>
             <input
@@ -324,17 +429,21 @@ export default function CreateBlog() {
       {step === 6 && (
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4 md:p-6">
           <h2 className="text-lg font-semibold text-white mb-4">Uniqueness check</h2>
-          <div className="flex items-center gap-4 mb-6">
-            <div className={`rounded-full p-4 ${uniqueness !== null && uniqueness >= 90 ? 'bg-emerald-500/20' : uniqueness !== null && uniqueness >= 70 ? 'bg-amber-500/20' : 'bg-red-500/20'}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+            <div className={`rounded-full p-4 shrink-0 ${uniqueness !== null && uniqueness >= 90 ? 'bg-emerald-500/20' : uniqueness !== null && uniqueness >= 70 ? 'bg-amber-500/20' : 'bg-red-500/20'}`}>
               <span className={`text-2xl font-bold ${uniqueness !== null && uniqueness >= 90 ? 'text-emerald-400' : uniqueness !== null && uniqueness >= 70 ? 'text-amber-400' : 'text-red-400'}`}>
                 {uniqueness !== null ? `${uniqueness}%` : '...'}
               </span>
             </div>
-            <p className="text-slate-400">
-              {uniqueness !== null && uniqueness >= 90 && 'Great! Content is highly unique.'}
-              {uniqueness !== null && uniqueness >= 70 && uniqueness < 90 && 'Acceptable. Consider editing for more uniqueness.'}
-              {uniqueness !== null && uniqueness < 70 && 'Low uniqueness. Regenerate or edit content.'}
-            </p>
+            <div>
+              <p className="text-slate-400">
+                {uniqueness !== null && uniqueness >= 90 && 'Great! Content is highly unique.'}
+                {uniqueness !== null && uniqueness >= 70 && uniqueness < 90 && 'Acceptable. Consider editing for more uniqueness.'}
+                {uniqueness !== null && uniqueness < 70 && 'Low uniqueness. Regenerate or edit content.'}
+              </p>
+              {plagiarismNote && <p className="text-amber-400 text-sm mt-1">{plagiarismNote}</p>}
+              <p className="text-slate-500 text-xs mt-1">Our check compares against your saved blogs. Use external tools (e.g. Copyscape) for web-wide verification.</p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={() => setStep(5)} className="rounded-lg border border-slate-600 px-4 py-2 text-slate-300 hover:bg-slate-700">
@@ -397,6 +506,7 @@ export default function CreateBlog() {
               setImageData(null);
               setImageUrl(null);
               setUniqueness(null);
+              setPlagiarismNote(null);
               setUploadResults([]);
             }}
             className="rounded-lg bg-cyan-500 px-6 py-2 font-medium text-white hover:bg-cyan-600"

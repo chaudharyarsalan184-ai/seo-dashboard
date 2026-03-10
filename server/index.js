@@ -75,6 +75,20 @@ async function groqChat(prompt) {
   return resp.choices[0]?.message?.content || '';
 }
 
+async function groqChatWithSystem(systemPrompt, userPrompt) {
+  const groq = getGroq();
+  const resp = await groq.chat.completions.create({
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
+    model: 'llama-3.3-70b-versatile',
+    temperature: 0.85,
+    max_tokens: 4096,
+  });
+  return resp.choices[0]?.message?.content || '';
+}
+
 // ============ WEBSITES ============
 app.get('/api/websites', async (req, res) => {
   try {
@@ -172,42 +186,68 @@ const UNIQUE_ANGLES = [
   'focus on food, markets, and street-level experiences',
 ];
 
-const BANNED_PHRASES = 'NEVER use these generic phrases: "hidden gem", "picture-perfect", "bucket list", "off the beaten path", "stunning views", "breathtaking", "must-visit", "paradise", "heaven on earth", "worth every penny". Invent your own descriptors.';
+const BANNED_PHRASES = `NEVER use these phrases (instant plagiarism): "hidden gem", "picture-perfect", "bucket list", "off the beaten path", "stunning views", "breathtaking", "must-visit", "paradise", "heaven on earth", "worth every penny", "dream destination", "unforgettable experience", "once in a lifetime", "best kept secret", "worth the trip", "don't miss", "highly recommend", "perfect for", "ideal destination". Create your OWN phrases every time.`;
 
 // ============ BLOG CONTENT (AI) ============
 app.post('/api/generate-content', async (req, res) => {
   try {
-    const { topic, category, keywords, angleIndex } = req.body;
+    const { topic, category, keywords, angleIndex, wordLimit, numH2, numH3, numFaqs } = req.body;
     const kwList = Array.isArray(keywords) ? keywords.join(', ') : keywords;
     const idx = typeof angleIndex === 'number' ? angleIndex % UNIQUE_ANGLES.length : Math.floor(Math.random() * UNIQUE_ANGLES.length);
     const angle = UNIQUE_ANGLES[idx];
-    
-    const contentPrompt = `Write a travel blog post about "${topic}" for category "${category}". 
+    const words = Math.min(2000, Math.max(300, parseInt(wordLimit, 10) || 1000));
+    const h2Count = Math.min(10, Math.max(2, parseInt(numH2, 10) || 5));
+    const h3PerH2 = Math.min(6, Math.max(0, parseInt(numH3, 10) || 2));
+    const faqCount = Math.min(10, Math.max(2, parseInt(numFaqs, 10) || 4));
 
-CRITICAL - MAXIMUM UNIQUENESS (content must pass plagiarism detection):
-- Write as if NO other travel article about this exists. Use ONLY your own original phrases.
-- ${BANNED_PHRASES}
-- This article MUST have a unique angle: ${angle}
-- Use specific numbers, names, local terms, unexpected comparisons. Avoid generic lists.
-- Vary sentence structure heavily - mix short punchy sentences with longer ones. No repetitive patterns.
-- Every paragraph must offer information that would not appear in a typical generic travel guide.
+    const h3Req = h3PerH2 > 0 ? `Each h2 MUST have exactly ${h3PerH2} <h3> subsections.` : 'Do not use h3 tags.';
 
-Use these SEO keywords naturally: ${kwList}
+    const contentPrompt = `You are an original travel writer. Your content must be 100% unique - ZERO plagiarism. Write ONLY in your own invented phrases. Never use common travel-writing formulas.
 
-Requirements:
-- Exactly 1000-1200 words
-- Proper HTML: <h1> (title) then <h2> (main sections) and <h3> (subsections), <p> for paragraphs
-- 4-6 h2 sections, 2-4 h3 subsections
-- Practical tips, insider knowledge, specific details
-- First person or conversational tone
-- Return ONLY the HTML content. Start with <h1>...</h1>, then <p>, <h2>, <p>, etc. No meta tags.`;
+TOPIC: "${topic}" | CATEGORY: "${category}"
+UNIQUE ANGLE (strictly follow): ${angle}
+
+${BANNED_PHRASES}
+- Invent every sentence from scratch. Use specific numbers, local names, real prices.
+- Vary sentence length wildly (3 words to 30 words). No repetitive patterns.
+- Include personal opinions or surprising takes that no standard guide would have.
+
+SEO keywords to weave in naturally: ${kwList}
+
+=== MANDATORY OUTPUT STRUCTURE ===
+1. <h1>Unique title</h1>
+2. <p>Opening (80-120 words)</p>
+3. MAIN BODY: Exactly ${h2Count} <h2> sections. ${h3Req}
+
+4. BULLET & NUMBERED LISTS (critical - include in multiple sections):
+   - For each section that lists items, use: <p>Intro line (e.g. "Typical factors:" or "Key benefits:")</p><ul><li>Item one</li><li>Item two</li></ul>
+   - Include at least 3-4 bullet list sections with intro lines. Example format:
+     <h2>Eligibility Criteria</h2>
+     <p>Typical eligibility factors:</p>
+     <ul><li>Minimum age requirement (65+)</li><li>Valid ID</li></ul>
+   - Include at least 1 numbered/steps section. Example:
+     <h2>How to Book</h2>
+     <ol><li>Search flights</li><li>Select fare</li><li>Enter details</li><li>Confirm</li></ol>
+   - Include a "Tips" or "Benefits" section with <ul><li>bullet points</li></ul>
+
+5. <h2>Frequently Asked Questions</h2> - Include exactly ${faqCount} FAQs about "${topic}". Format: <h3>Question?</h3><p>Answer.</p>
+6. <p>Conclusion</p>
+
+=== CRITICAL REQUIREMENTS ===
+- WORD COUNT: Your response MUST be ${words} words minimum. Aim for ${words}-${words + 100}. Each h2 section ≈ ${Math.round(words / (h2Count + 2))} words.
+- H2 TAGS: Exactly ${h2Count} <h2> in main body + 1 <h2>FAQ</h2>. Total: ${h2Count + 1} h2 tags.
+- BULLET LISTS: At least 3-4 <ul><li> lists with intro lines like "Typical factors:" or "Key benefits:" before each list. Use <ol><li> for any "How to" steps.
+- FAQ: Exactly ${faqCount} <h3>Question?</h3><p>Answer</p> pairs.
+- OUTPUT: Raw HTML only. Start with <h1>. No markdown, no \`\`\`, no explanation.`;
     
     const metaPrompt = `Generate SEO meta for a travel blog: Topic "${topic}", Category "${category}". 
 Return ONLY valid JSON: {"metaTitle":"...","metaDescription":"..."} 
 metaTitle: 50-60 chars, include main keyword. metaDescription: 150-160 chars, compelling.`;
     
+    const systemPrompt = `You are a travel blogger. RULES: 1) Follow word count EXACTLY - count your output. 2) Use EXACTLY the number of h2/h3 tags specified. 3) Write 100% in your own words - zero copied phrases. 4) Include bullet lists and FAQ. 5) Output only valid HTML, no markdown.`;
+
     const [contentText, metaText] = await Promise.all([
-      groqChat(contentPrompt),
+      groqChatWithSystem(systemPrompt, contentPrompt),
       groqChat(metaPrompt)
     ]);
     
@@ -264,7 +304,17 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // ============ PLAGIARISM / UNIQUENESS CHECK ============
-function ngramSimilarity(text1, text2, n = 3) {
+// Common travel phrases that often trigger plagiarism detectors
+const COMMON_PHRASES = [
+  'hidden gem', 'off the beaten path', 'bucket list', 'must-visit', 'worth the trip',
+  'picture perfect', 'stunning views', 'breathtaking', 'paradise', 'heaven on earth',
+  'once in a lifetime', 'travel experience', 'best time to visit', 'don\'t miss',
+  'highly recommend', 'perfect destination', 'ideal for', 'rich in culture',
+  'steeped in history', 'vibrant', 'charming', 'enchanting', 'magical', 'unforgettable',
+  'dream destination', 'best kept secret', 'worth every penny', 'ideal destination'
+];
+
+function ngramSimilarity(text1, text2, n = 4) {
   const getNgrams = (t) => {
     const normalized = t.toLowerCase().replace(/\s+/g, ' ');
     const ngrams = new Set();
@@ -282,19 +332,35 @@ function ngramSimilarity(text1, text2, n = 3) {
   return ng1.size > 0 ? (matches / ng1.size) * 100 : 0;
 }
 
+function commonPhrasePenalty(text) {
+  const lower = text.toLowerCase();
+  let count = 0;
+  for (const phrase of COMMON_PHRASES) {
+    if (lower.includes(phrase)) count += 3; // each match reduces uniqueness
+  }
+  return Math.min(30, count); // max 30% penalty
+}
+
 app.post('/api/plagiarism-check', async (req, res) => {
   try {
     const { content } = req.body;
     const blogs = await loadJSON(BLOGS_FILE);
-    
+
     let maxSimilarity = 0;
     for (const blog of blogs) {
-      const sim = ngramSimilarity(content, blog.content || '');
+      const sim3 = ngramSimilarity(content, blog.content || '', 3);
+      const sim4 = ngramSimilarity(content, blog.content || '', 4);
+      const sim = Math.max(sim3, sim4);
       if (sim > maxSimilarity) maxSimilarity = sim;
     }
-    
-    const uniqueness = Math.max(0, 100 - maxSimilarity);
-    res.json({ uniqueness: Math.round(uniqueness * 10) / 10, similarity: Math.round(maxSimilarity * 10) / 10 });
+
+    const phrasePenalty = commonPhrasePenalty(content);
+    const uniqueness = Math.max(0, Math.min(100, 100 - maxSimilarity - phrasePenalty));
+    res.json({
+      uniqueness: Math.round(uniqueness * 10) / 10,
+      similarity: Math.round(maxSimilarity * 10) / 10,
+      note: phrasePenalty > 0 ? 'Common phrases detected. Consider replacing for better uniqueness.' : null
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
